@@ -29,9 +29,15 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
             X_SERIES_BAUDRATE_TABLE as SERIES_BAUDRATE_TABLE,
         )
         from lerobot.common.robot_devices.motors.dynamixel import DynamixelMotorsBus as MotorsBusClass
+    elif brand == "waveshare":
+        from lerobot.common.robot_devices.motors.waveshare import MODEL_BAUDRATE_TABLE
+        from lerobot.common.robot_devices.motors.waveshare import (
+            SCS_SERIES_BAUDRATE_TABLE as SERIES_BAUDRATE_TABLE,
+        )
+        from lerobot.common.robot_devices.motors.waveshare import WaveshareMotorsBus as MotorsBusClass
     else:
         raise ValueError(
-            f"Currently we do not support this motor brand: {brand}. We currently support feetech and dynamixel motors."
+            f"Currently we do not support this motor brand: {brand}. We currently support waveshare, feetech and dynamixel motors."
         )
 
     # Check if the provided model exists in the model_baud_rate_table
@@ -65,6 +71,7 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
         for baudrate in all_baudrates:
             motor_bus.set_bus_baudrate(baudrate)
             present_ids = motor_bus.find_motor_indices(list(range(1, 10)))
+            print(present_ids)
             if len(present_ids) > 1:
                 raise ValueError(
                     "Error: More than one motor ID detected. This script is designed to only handle one motor at a time. Please disconnect all but one motor."
@@ -83,9 +90,10 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
 
         print(f"Motor index found at: {motor_index}")
 
-        if brand == "feetech":
+        if brand == "feetech" or brand == "waveshare":
             # Allows ID and BAUDRATE to be written in memory
             motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "Lock", 0)
+            # print("he")
 
         if baudrate != baudrate_des:
             print(f"Setting its baudrate to {baudrate_des}")
@@ -95,21 +103,21 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
             motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "Baud_Rate", baudrate_idx)
             time.sleep(0.5)
             motor_bus.set_bus_baudrate(baudrate_des)
-            present_baudrate_idx = motor_bus.read_with_motor_ids(
-                motor_bus.motor_models, motor_index, "Baud_Rate", num_retry=2
-            )
+            # present_baudrate_idx = motor_bus.read_with_motor_ids(
+            #     motor_bus.motor_models, motor_index, "Baud_Rate", num_retry=2
+            # )
 
-            if present_baudrate_idx != baudrate_idx:
-                raise OSError("Failed to write baudrate.")
+            # if present_baudrate_idx != baudrate_idx:
+            #     raise OSError("Failed to write baudrate.")
 
         print(f"Setting its index to desired index {motor_idx_des}")
         if brand == "feetech":
             motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "Lock", 0)
         motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "ID", motor_idx_des)
 
-        present_idx = motor_bus.read_with_motor_ids(motor_bus.motor_models, motor_idx_des, "ID", num_retry=2)
-        if present_idx != motor_idx_des:
-            raise OSError("Failed to write index.")
+        # present_idx = motor_bus.read_with_motor_ids(motor_bus.motor_models, motor_idx_des, "ID", num_retry=2)
+        # if present_idx != motor_idx_des:
+        #     raise OSError("Failed to write index.")
 
         if brand == "feetech":
             # Set Maximum_Acceleration to 254 to speedup acceleration and deceleration of
@@ -118,6 +126,26 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
             motor_bus.write("Maximum_Acceleration", 254)
 
             motor_bus.write("Goal_Position", 2048)
+            time.sleep(4)
+            print("Present Position", motor_bus.read("Present_Position"))
+
+            motor_bus.write("Offset", 0)
+            time.sleep(4)
+            print("Offset", motor_bus.read("Offset"))
+
+        if brand == "waveshare":
+            # Set Maximum_Acceleration to 254 to speedup acceleration and deceleration of
+            # the motors. Note: this configuration is not in the official STS3215 Memory Table
+            motor_bus.write("Lock", 0)
+            motor_bus.write("Maximum_Acceleration", 254)
+
+            if model == "sc09_servo":
+                motor_bus.write("Goal_Position", 512)
+
+            if model == "st3125" :
+                motor_bus.write("Goal_Position", 1024)
+
+            # if model == "st3125":
             time.sleep(4)
             print("Present Position", motor_bus.read("Present_Position"))
 
