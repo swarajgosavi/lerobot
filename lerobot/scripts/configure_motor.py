@@ -103,21 +103,21 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
             motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "Baud_Rate", baudrate_idx)
             time.sleep(0.5)
             motor_bus.set_bus_baudrate(baudrate_des)
-            # present_baudrate_idx = motor_bus.read_with_motor_ids(
-            #     motor_bus.motor_models, motor_index, "Baud_Rate", num_retry=2
-            # )
+            present_baudrate_idx = motor_bus.read_with_motor_ids(
+                motor_bus.motor_models, motor_index, "Baud_Rate", num_retry=2
+            )
 
-            # if present_baudrate_idx != baudrate_idx:
-            #     raise OSError("Failed to write baudrate.")
+            if present_baudrate_idx != baudrate_idx:
+                raise OSError("Failed to write baudrate.")
 
         print(f"Setting its index to desired index {motor_idx_des}")
         if brand == "feetech":
             motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "Lock", 0)
         motor_bus.write_with_motor_ids(motor_bus.motor_models, motor_index, "ID", motor_idx_des)
 
-        # present_idx = motor_bus.read_with_motor_ids(motor_bus.motor_models, motor_idx_des, "ID", num_retry=2)
-        # if present_idx != motor_idx_des:
-        #     raise OSError("Failed to write index.")
+        present_idx = motor_bus.read_with_motor_ids(motor_bus.motor_models, motor_idx_des, "ID", num_retry=2)
+        if present_idx != motor_idx_des:
+            raise OSError("Failed to write index.")
 
         if brand == "feetech":
             # Set Maximum_Acceleration to 254 to speedup acceleration and deceleration of
@@ -142,8 +142,8 @@ def configure_motor(port, brand, model, motor_idx_des, baudrate_des):
             if model == "sc09_servo":
                 motor_bus.write("Goal_Position", 512)
 
-            if model == "st3125" :
-                motor_bus.write("Goal_Position", 1024)
+            if model == "st3215" :
+                motor_bus.write("Goal_Position", 2048)
 
             # if model == "st3125":
             time.sleep(4)
