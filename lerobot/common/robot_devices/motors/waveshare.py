@@ -606,12 +606,14 @@ class WaveshareMotorsBus:
         """Inverse of `apply_calibration`."""
         if motor_names is None:
             motor_names = self.motor_names
-
+        print("motor names", self.motor_names)
+        print(values)
         for i, name in enumerate(motor_names):
             calib_idx = self.calibration["motor_names"].index(name)
             calib_mode = self.calibration["calib_mode"][calib_idx]
 
             if CalibrationMode[calib_mode] == CalibrationMode.DEGREE:
+                
                 drive_mode = self.calibration["drive_mode"][calib_idx]
                 homing_offset = self.calibration["homing_offset"][calib_idx]
                 _, model = self.motors[name]
@@ -1218,10 +1220,11 @@ class WaveshareMotorsBus:
 
         
 
-        if data_name in CALIBRATION_REQUIRED and self.calibration is not None:
-            values = self.revert_calibration(values, motor_names)
+        # if data_name in CALIBRATION_REQUIRED and self.calibration is not None:
+        #     values = self.revert_calibration(values, motor_names)
 
         values = values.tolist()
+        print("values2", values)
 
         motor_ids = []
         models = []

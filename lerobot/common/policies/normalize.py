@@ -124,6 +124,8 @@ class Normalize(nn.Module):
         super().__init__()
         self.shapes = shapes
         self.modes = modes
+        # print("Shubham")
+        # print(modes, shapes)
         self.stats = stats
         stats_buffers = create_stats_buffers(shapes, modes, stats)
         for key, buffer in stats_buffers.items():
@@ -133,6 +135,7 @@ class Normalize(nn.Module):
     @torch.no_grad
     def forward(self, batch: dict[str, Tensor]) -> dict[str, Tensor]:
         batch = dict(batch)  # shallow copy avoids mutating the input batch
+        # print(batch)
         for key, mode in self.modes.items():
             buffer = getattr(self, "buffer_" + key.replace(".", "_"))
 
@@ -141,12 +144,22 @@ class Normalize(nn.Module):
                 std = buffer["std"]
                 assert not torch.isinf(mean).any(), _no_stats_error_str("mean")
                 assert not torch.isinf(std).any(), _no_stats_error_str("std")
+                # print("swaraj")
+                # print(mean.shape)
+                # print(std.shape)
+                # print(batch[key].shape)
                 batch[key] = (batch[key] - mean) / (std + 1e-8)
             elif mode == "min_max":
                 min = buffer["min"]
                 max = buffer["max"]
                 assert not torch.isinf(min).any(), _no_stats_error_str("min")
                 assert not torch.isinf(max).any(), _no_stats_error_str("max")
+                # print("swaraj2")
+                # print(min.shape)
+                # print(max.shape)
+                # print(max, min, key)
+
+                # print(batch[key].shape)
                 # normalize to [0,1]
                 batch[key] = (batch[key] - min) / (max - min + 1e-8)
                 # normalize to [-1, 1]

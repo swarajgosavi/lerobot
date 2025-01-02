@@ -37,7 +37,9 @@ def find_cameras(raise_when_empty=False, max_index_search_range=MAX_OPENCV_INDEX
         print("Linux detected. Finding available camera indices through scanning '/dev/video*' ports")
         possible_ports = [str(port) for port in Path("/dev").glob("video*")]
         ports = _find_cameras(possible_ports, mock=mock)
+        print(ports)
         for port in ports:
+            print(port)
             cameras.append(
                 {
                     "port": port,
@@ -69,9 +71,10 @@ def _find_cameras(
         import tests.mock_cv2 as cv2
     else:
         import cv2
-
+    print(possible_camera_ids)
     camera_ids = []
     for camera_idx in possible_camera_ids:
+        print(camera_idx)
         camera = cv2.VideoCapture(camera_idx)
         is_open = camera.isOpened()
         camera.release()

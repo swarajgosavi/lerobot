@@ -9,7 +9,7 @@ dataset_repo_id: lerobot/pusht
 
 override_dataset_stats:
   # TODO(rcadene, alexander-soare): should we remove image stats as well? do we use a pretrained vision model?
-  observation.image:
+  observation.images.laptop:
     mean: [[[0.5]], [[0.5]], [[0.5]]]  # (c,1,1)
     std: [[[0.5]], [[0.5]], [[0.5]]]  # (c,1,1)
   # TODO(rcadene, alexander-soare): we override state and action stats to use the same as the pretrained model
@@ -39,7 +39,7 @@ training:
   online_steps_between_rollouts: 1
 
   delta_timestamps:
-    observation.image: "[i / ${fps} for i in range(1 - ${policy.n_obs_steps}, 1)]"
+    observation.images.laptop: "[i / ${fps} for i in range(1 - ${policy.n_obs_steps}, 1)]"
     observation.state: "[i / ${fps} for i in range(1 - ${policy.n_obs_steps}, 1)]"
     action: "[i / ${fps} for i in range(1 - ${policy.n_obs_steps}, 1 - ${policy.n_obs_steps} + ${policy.horizon})]"
 
@@ -61,14 +61,14 @@ policy:
 
   input_shapes:
     # TODO(rcadene, alexander-soare): add variables for height and width from the dataset/env?
-    observation.image: [3, 96, 96]
+    observation.images.laptop: [3, 96, 96]
     observation.state: ["${env.state_dim}"]
   output_shapes:
     action: ["${env.action_dim}"]
 
   # Normalization / Unnormalization
   input_normalization_modes:
-    observation.image: mean_std
+    observation.images.laptop: mean_std
     observation.state: min_max
   output_normalization_modes:
     action: min_max

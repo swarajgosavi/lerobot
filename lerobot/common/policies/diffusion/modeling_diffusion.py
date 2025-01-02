@@ -73,15 +73,19 @@ class DiffusionPolicy(
         if config is None:
             config = DiffusionConfig()
         self.config = config
+        # print("log: ", self.config)
         self.normalize_inputs = Normalize(
             config.input_shapes, config.input_normalization_modes, dataset_stats
         )
+        # print("in done")
         self.normalize_targets = Normalize(
             config.output_shapes, config.output_normalization_modes, dataset_stats
         )
+        # print("out done")
         self.unnormalize_outputs = Unnormalize(
             config.output_shapes, config.output_normalization_modes, dataset_stats
         )
+        # print("unnor")
 
         # queues are populated during rollout of the policy, they contain the n latest observations and actions
         self._queues = None

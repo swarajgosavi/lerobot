@@ -12,10 +12,10 @@ follower_arm = FeetechMotorsBus(
         # name: (index, model)
       "shoulder_pan": (1, "sts3215"),
       "shoulder_lift": (2, "sts3215"),
-      "elbow_flex": (3, "sts3215"),
-      "wrist_flex": (4, "sts3215"),
-      "wrist_roll": (5, "sts3215"),
-      "gripper": (6, "sts3215"),
+    #   "elbow_flex": (3, "sts3215"),
+    #   "wrist_flex": (4, "sts3215"),
+    #   "wrist_roll": (5, "sts3215"),
+    #   "gripper": (6, "sts3215"),
     },
 )
 
@@ -29,14 +29,14 @@ robot = ManipulatorRobot(
     follower_arms={"main": follower_arm},
     calibration_dir=".cache/calibration/so100",
     cameras={
-        "laptop": OpenCVCamera(6, fps=30, width=640, height=480),
-        "logitech": OpenCVCamera(4, fps=30, width=640, height=480),
+        "laptop": OpenCVCamera(2, fps=30, width=640, height=480),
+        # "logitech": OpenCVCamera(4, fps=30, width=640, height=480),
     },
 )
 # robot.disconnect()
 robot.connect()
 
-from lerobot.common.policies.act.modeling_act import ACTPolicy
+from lerobot.common.policies.diffusion.modeling_diffusion import DiffusionPolicy
 import time
 import torch
 
@@ -44,8 +44,8 @@ inference_time_s = 60
 fps = 30
 device = "cpu"  # TODO: On Mac, use "mps" or "cpu"
 
-ckpt_path = Path(snapshot_download("AdamLucek/act_koch_block"))
-policy = ACTPolicy.from_pretrained(ckpt_path)
+ckpt_path = Path(snapshot_download("lerobot/diffusion_pusht"))
+policy = DiffusionPolicy.from_pretrained(ckpt_path)
 policy.to(device)
 
 for _ in range(1 * fps):
@@ -68,7 +68,7 @@ for _ in range(1 * fps):
     with torch.inference_mode():
         action = policy.select_action(observation)
     # Remove batch dimension
-    # action = action.squeeze(0)
+    action = action.squeeze(0)
     # Move to cpu, if not already the case
     action = action.to("cpu")
     # Order the robot to move

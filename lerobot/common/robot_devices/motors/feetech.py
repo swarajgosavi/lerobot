@@ -584,6 +584,8 @@ class FeetechMotorsBus:
         if motor_names is None:
             motor_names = self.motor_names
 
+        # values = values.reshape((2, ))
+
         for i, name in enumerate(motor_names):
             calib_idx = self.calibration["motor_names"].index(name)
             calib_mode = self.calibration["calib_mode"][calib_idx]
@@ -596,6 +598,8 @@ class FeetechMotorsBus:
 
                 # Convert from nominal 0-centered degree range [-180, 180] to
                 # 0-centered resolution range (e.g. [-2048, 2048] for resolution=4096)
+                # print("values", values)
+                
                 values[i] = values[i] / HALF_TURN_DEGREE * (resolution // 2)
 
                 # Substract the homing offsets to come back to actual motor range of values

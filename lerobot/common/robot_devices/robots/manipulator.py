@@ -303,8 +303,8 @@ class ManipulatorRobot:
         if self.robot_type in ["koch", "koch_bimanual", "aloha"]:
             from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
         elif self.robot_type in ["so100", "moss"]:
-            # from lerobot.common.robot_devices.motors.feetech import TorqueMode
-            from lerobot.common.robot_devices.motors.waveshare import TorqueMode
+            from lerobot.common.robot_devices.motors.feetech import TorqueMode
+            # from lerobot.common.robot_devices.motors.waveshare import TorqueMode
         
 
         # We assume that at connection time, arms are in a rest position, and torque can
@@ -375,7 +375,7 @@ class ManipulatorRobot:
                     calibration = run_arm_calibration(arm, self.robot_type, name, arm_type)
 
                 elif self.robot_type in ["so100", "moss"]:
-                    from lerobot.common.robot_devices.robots.waveshare_calibration import (
+                    from lerobot.common.robot_devices.robots.feetech_calibration import (
                         run_arm_manual_calibration,
                     )
 
@@ -604,6 +604,9 @@ class ManipulatorRobot:
         for name in self.follower_arms:
             if name in follower_pos:
                 state.append(follower_pos[name])
+        # print("before",state)
+        state[0] = state[0][:2]
+        # print("after", state)
         state = torch.cat(state)
 
         # Capture images from cameras
@@ -618,8 +621,13 @@ class ManipulatorRobot:
         # Populate output dictionnaries and format to pytorch
         obs_dict = {}
         obs_dict["observation.state"] = state
-        for name in self.cameras:
-            obs_dict[f"observation.images.{name}"] = images[name]
+        # print("cam : ", self.cameras)
+        if len(self.cameras) == 1:
+            for name in self.cameras:
+                obs_dict[f"observation.image"] = images[name]
+        else:
+            for name in self.cameras:
+                obs_dict[f"observation.images.{name}"] = images[name]
         return obs_dict
 
     def send_action(self, action: torch.Tensor) -> torch.Tensor:
